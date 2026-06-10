@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🇦🇷💗🇪🇸</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: #ffdff0;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #d84c8d;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #mensaje {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            color: #d84c8d;
+            font-weight: bold;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
+        }
+
+        .calendarios {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .calendario {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, .08);
+            width: 320px;
+        }
+
+        .calendario h2 {
+            text-align: center;
+            color: #d84c8d;
+            margin-bottom: 15px;
+        }
+
+        .dias-semana,
+        .dias {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .dias-semana div {
+            text-align: center;
+            font-weight: bold;
+            color: #c76d9d;
+        }
+
+        .dia {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .dia:hover {
+            background: #ffc4e1;
+        }
+
+        .vacio {
+            visibility: hidden;
+        }
+
+        .correcto {
+            background: #ff87c2 !important;
+            color: white;
+            font-weight: bold;
+        }
+
+        .vacaciones {
+            background: #d98aa8;
+        }
+
+        #feedback {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #b73474;
+            font-weight: bold;
+            min-height: 30px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background-image: url("IMG_7667.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            max-width: 900px;
+            width: 100%;
+            border-radius: 25px;
+            overflow: auto;
+            max-height: 90vh;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .modal img {
+            width: 100%;
+            max-width: 450px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .modal h2 {
+            color: #d84c8d;
+            margin-bottom: 15px;
+        }
+
+        .modal p {
+            font-size: 1.5rem;
+            color: #b73474;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .modal p span, .modal-content > h2{
+            background-color: white;
+            display: inline-block;
+        }
+
+        .cerrar {
+            margin-top: 20px;
+            padding: 12px 25px;
+            border: none;
+            background: #ff87c2;
+            color: white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        #feedback {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #b73474;
+            font-weight: bold;
+            min-height: 30px;
+        }
+
+        .feedback-animado {
+            animation: feedbackPop .35s ease;
+        }
+
+        #calendarioFinal {
+            display: flex;
+            justify-content: space-evenly;
+        }
+
+        @keyframes feedbackPop {
+            0% {
+                transform: scale(0.6);
+                opacity: 0;
+            }
+
+            70% {
+                transform: scale(1.15);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>❤️ Una pequeña misión ❤️</h1>
+
+    <div id="mensaje">
+        Selecciona el inicio de las vacaciones de Hugo
+    </div>
+
+    <div class="calendarios">
+        <div id="diciembre"></div>
+        <div id="enero"></div>
+    </div>
+
+    <div id="feedback"></div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h2>🎉 ¡Lo has conseguido! 🎉</h2>
+
+            <div id="calendarioFinal"></div>
+
+            <p>
+                <span>❤️ ¡Vacaciones del 21 al 3! ❤️</span><br><br>
+                <span>¿Nochevieja juntos...?</span>
+            </p>
+
+            <button class="cerrar" onclick="cerrarModal()">
+                Cerrar
+            </button>
+        </div>
+    </div>
+
+    <script>
+
+        const inicioCorrecto = {
+            mes: 12,
+            dia: 21
+        };
+
+        const finCorrecto = {
+            mes: 1,
+            dia: 3
+        };
+
+        let fase = "inicio";
+
+        function crearCalendario(nombre, mes, año, contenedorId, interactivo = true) {
+
+            const contenedor = document.getElementById(contenedorId);
+
+            const calendario = document.createElement("div");
+            calendario.className = "calendario";
+
+            calendario.innerHTML = `
+        <h2>${nombre} ${año}</h2>
+        <div class="dias-semana">
+            <div>L</div>
+            <div>M</div>
+            <div>X</div>
+            <div>J</div>
+            <div>V</div>
+            <div>S</div>
+            <div>D</div>
+        </div>
+        <div class="dias"></div>
+    `;
+
+            const diasContainer = calendario.querySelector(".dias");
+
+            const primerDia = new Date(año, mes - 1, 1);
+            let offset = primerDia.getDay();
+            offset = offset === 0 ? 6 : offset - 1;
+
+            const totalDias = new Date(año, mes, 0).getDate();
+
+            for (let i = 0; i < offset; i++) {
+                const vacio = document.createElement("div");
+                vacio.className = "dia vacio";
+                diasContainer.appendChild(vacio);
+            }
+
+            for (let dia = 1; dia <= totalDias; dia++) {
+
+                const celda = document.createElement("div");
+                celda.className = "dia";
+                celda.textContent = dia;
+
+                const enVacaciones =
+                    (mes === 12 && dia >= 21) ||
+                    (mes === 1 && dia <= 3);
+
+                if (!interactivo && enVacaciones) {
+                    celda.classList.add("vacaciones");
+                }
+
+                if (interactivo) {
+                    celda.addEventListener("click", () => seleccionarFecha(mes, dia, celda));
+                }
+
+                diasContainer.appendChild(celda);
+            }
+
+            contenedor.appendChild(calendario);
+        }
+
+        function seleccionarFecha(mes, dia, elemento) {
+
+            const feedback = document.getElementById("feedback");
+
+            if (fase === "inicio") {
+
+                if (mes < 12 || (mes === 12 && dia < 21)) {
+                    mostrarFeedback("¡No tan pronto!");
+                    return;
+                }
+
+                if (mes > 12 || dia > 21) {
+                    mostrarFeedback("Un poquito antes...");
+                    return;
+                }
+
+                elemento.classList.add("correcto");
+
+                mostrarFeedback("¡Correcto!");
+                document.getElementById("mensaje").textContent =
+                    "Selecciona la fecha de fin de vacaciones de Hugo";
+
+                fase = "fin";
+                return;
+            }
+
+            if (fase === "fin") {
+
+                const valorActual = mes === 12 ? dia : 100 + dia;
+                const valorCorrecto = 103;
+
+                if (valorActual < valorCorrecto) {
+                    mostrarFeedback("¡No tan pronto!");
+                    return;
+                }
+
+                if (valorActual > valorCorrecto) {
+                    mostrarFeedback("Un poquito antes...");
+                    return;
+                }
+
+                elemento.classList.add("correcto");
+                mostrarFeedback("¡Correcto!");
+
+                mostrarModal();
+            }
+        }
+
+        function mostrarModal() {
+
+            document.getElementById("modal").style.display = "flex";
+
+            const calendarioFinal = document.getElementById("calendarioFinal");
+            calendarioFinal.innerHTML = "";
+
+            crearCalendario(
+                "Diciembre",
+                12,
+                2026,
+                "calendarioFinal",
+                false
+            );
+
+            crearCalendario(
+                "Enero",
+                1,
+                2027,
+                "calendarioFinal",
+                false
+            );
+        }
+
+        function cerrarModal() {
+            document.getElementById("modal").style.display = "none";
+        }
+
+        crearCalendario(
+            "Diciembre",
+            12,
+            2026,
+            "diciembre"
+        );
+
+        crearCalendario(
+            "Enero",
+            1,
+            2027,
+            "enero"
+        );
+
+        function mostrarFeedback(texto) {
+
+            const feedback = document.getElementById("feedback");
+
+            feedback.classList.remove("feedback-animado");
+
+            // Fuerza el reinicio de la animación
+            void feedback.offsetWidth;
+
+            feedback.textContent = texto;
+
+            feedback.classList.add("feedback-animado");
+        }
+
+    </script>
+
+</body>
+
+</html>
